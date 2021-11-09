@@ -4,14 +4,27 @@ const cart=()=>{
     const close=modalCart.querySelector('.close');
     const body=modalCart.querySelector('.modal-body');
     const buttonSend=modalCart.querySelector('.button-primary');
+    const price=modalCart.querySelector('.modal-pricetag');
+    const cancel=modalCart.querySelector('.clear-cart');
+    
 
     const resetCart=()=>{
         body.innerHTML='';
         localStorage.removeItem('cart');
         modalCart.classList.remove('is-open');
     };
+
+    const changePrice=()=>{
+        let allPrice=0;
+        const cartArray = JSON.parse(localStorage.getItem('cart'));
+        cartArray.forEach(({price, count})=>{
+            allPrice+=price*count;
+        });
+        price.innerHTML=`${allPrice} ₽`;
+    };
     
     const incrementCount=(id)=>{
+        console.log(id);
         const cartArray = JSON.parse(localStorage.getItem('cart'));
 
         cartArray.map(item=>{
@@ -53,6 +66,8 @@ const cart=()=>{
                 <button class="counter-button btn-inc" data-index="${id}">+</button>
             </div>`;
 
+            changePrice();
+
             cartElem.querySelector('.btn-dec').addEventListener('click',()=>{
                 decrimentCount(id);
             });
@@ -64,6 +79,12 @@ const cart=()=>{
             body.append(cartElem);
         }); 
     };
+
+    cancel.addEventListener('click',()=>{
+        localStorage.removeItem('cart');
+        location.reload();
+        modalCart.classList.remove('is-open');
+    });
 
     body.addEventListener('click', (e)=>{
         e.preventDefault();
@@ -77,6 +98,11 @@ const cart=()=>{
 
     buttonSend.addEventListener('click', ()=>{
         const cartArray = localStorage.getItem('cart');
+        
+        if(price.innerHTML==='0 ₽'){
+            alert('Вы ничего не выбрали!');
+            return;
+        }
 
         fetch('https://jsonplaceholder.typicode.com/posts',{
             method: 'POST', 
